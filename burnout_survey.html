@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Khảo sát Academic Burnout</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; padding: 20px; max-width:800px; margin:auto; line-height:1.5; }
+  h1 { font-size:1.4rem; }
+  .q { margin:12px 0; padding:10px; border-radius:8px; }
+  label { display:block; margin-bottom:6px; font-weight:600; }
+  select { width:100%; padding:8px; font-size:1rem; }
+  .btn { margin-top:12px; padding:10px 14px; border-radius:8px; cursor:pointer; border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .btn-primary { background:#2563eb; color:white; }
+  .btn-ghost { background:#f3f4f6; }
+  .result { margin-top:18px; padding:14px; border-radius:10px; background:#f8fafc; }
+  .warn { color:#b91c1c; font-weight:700; }
+  .ok { color:#065f46; font-weight:700; }
+  .note { font-size:0.9rem; color:#374151; margin-top:8px; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; }
+  td, th { padding:8px; border:1px solid #e5e7eb; text-align:left; }
+</style>
+</head>
+<body>
+  <h1>Khảo sát mức độ Academic Burnout (Dành cho HS)</h1>
+  <p>Hãy trả lời theo cảm nhận của bạn trong <strong>4 tuần gần nhất</strong>. Chọn số từ 0 (Không bao giờ) đến 6 (Mỗi ngày).</p>
+
+  <form id="surveyForm">
+    <!-- Exhaustion Q1-Q6 -->
+    <div id="questions"></div>
+
+    <button type="button" class="btn btn-primary" onclick="compute()">Xem kết quả</button>
+    <button type="button" class="btn btn-ghost" onclick="exportCSV()">Xuất CSV</button>
+  </form>
+
+  <div id="output" class="result" style="display:none;"></div>
+
+<script>
+// Mảng câu hỏi (15)
+const questions = [
+  "1. Tôi cảm thấy kiệt sức vì việc học.",
+  "2. Tôi thấy mệt mỏi khi phải làm bài/ôn luyện.",
+  "3. Tôi thấy không còn năng lượng để học ngoài giờ.",
+  "4. Tôi thấy áp lực học tập làm tôi căng thẳng thường xuyên.",
+  "5. Tôi khó tập trung vì đầu óc mệt mỏi.",
+  "6. Tôi thấy cần nhiều thời gian nghỉ hơn để hồi phục.",
+  "7. Tôi thấy mình dần dần không còn quan tâm tới việc học.",
+  "8. Tôi cảm thấy học nhiều nhưng không còn ý nghĩa.",
+  "9. Tôi thường cảm thấy xa lánh bạn bè/giáo viên khi nói về việc học.",
+  "10. Tôi cảm thấy chán nản với mục tiêu học tập của mình.",
+  "11. Tôi cảm thấy mình hoàn thành bài tập đúng yêu cầu.",
+  "12. Tôi tự tin có thể học và làm tốt các bài kiểm tra.",
+  "13. Tôi thấy mình có kỹ năng quản lý thời gian để học.",
+  "14. Tôi thường tìm ra cách giải quyết khi gặp khó trong học.",
+  "15. Tôi cảm thấy học tập của mình có tiến bộ rõ rệt."
+];
+
+const container = document.getElementById('questions');
+questions.forEach((q,i)=>{
+  const div = document.createElement('div');
+  div.className = 'q';
+  const label = document.createElement('label');
+  label.innerText = q;
+  div.appendChild(label);
+  const sel = document.createElement('select');
+  sel.id = 'q'+(i+1);
+  for(let v=0; v<=6; v++){
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.innerText = v;
+    sel.appendChild(opt);
+  }
+  div.appendChild(sel);
+  container.appendChild(div);
+});
+
+function compute(){
+  // read values
+  const vals = [];
+  for(let i=1;i<=15;i++) vals.push( Number(document.getElementById('q'+i).value) );
+
+  const ex = mean(vals.slice(0,6));
+  const cy = mean(vals.slice(6,10));
+  const ef = mean(vals.slice(10,15));
+  const ef_inv = 6 - ef;
+  const burnout = round2(ex + cy + ef_inv);
+
+  // level
+  let levelLabel = '';
+  if (burnout <= 6) levelLabel = 'Thấp';
+  else if (burnout <= 12) levelLabel = 'Trung bình';
+  else levelLabel = 'Cao';
+
+  // alert checks
+  const anyHigh = vals.some(v => v>=5);
+  const alert = (ex >= 4 || anyHigh) ? true : false;
+
+  // build UI
+  const out = document.getElementById('output');
+  out.style.display = 'block';
+  out.innerHTML = `
+    <h3>Kết quả nhanh</h3>
+    <table>
+      <tr><th>Chỉ số</th><th>Giá trị</th></tr>
+      <tr><td>Exhaustion (Cạn kiệt)</td><td>${ex}</td></tr>
+      <tr><td>Cynicism (Hoài nghi)</td><td>${cy}</td></tr>
+      <tr><td>Efficacy (Hiệu quả) - (đã đảo chiều)</td><td>${ef_inv}</td></tr>
+      <tr><td><strong>Burnout Index (0–18)</strong></td><td><strong>${burnout}</strong></td></tr>
+      <tr><td>Mức độ</td><td><strong>${levelLabel}</strong></td></tr>
+    </table>
+    <p class="note">${ alert ? '<span class="warn">Cảnh báo: có dấu hiệu cần hỗ trợ sớm. Vui lòng liên hệ cán bộ tư vấn nhà trường hoặc phụ huynh.</span>' : '<span class="ok">Không có cảnh báo khẩn cấp theo tiêu chí khảo sát này.</span>' }</p>
+    <div class="note">
+      <strong>Gợi ý hành động:</strong>
+      <ul>
+        <li>Nếu mức <strong>Cao</strong>: nên gặp tư vấn viên nhà trường; xem xét giảm tải tạm thời; tìm hỗ trợ chuyên môn nếu có dấu hiệu trầm cảm.</li>
+        <li>Nếu mức <strong>Trung bình</strong>: thử áp dụng Pomodoro, nhật ký biết ơn, tham gia nhóm đồng đẳng.</li>
+        <li>Nếu mức <strong>Thấp</strong>: duy trì thói quen học và cân bằng nghỉ ngơi.</li>
+      </ul>
+    </div>
+    <p class="note">Nguồn tham khảo: Dựa trên cấu trúc MBI-SS và lý thuyết tâm lý học học đường.</p>
+  `;
+
+  // store lastResult for CSV export
+  window.lastResult = { values: vals, ex, cy, ef, ef_inv, burnout, levelLabel, alert };
+}
+
+function mean(arr){ return round2(arr.reduce((a,b)=>a+b,0)/arr.length); }
+function round2(x){ return Math.round(x*100)/100; }
+
+function exportCSV(){
+  if(!window.lastResult){ alert('Chưa có kết quả để xuất. Vui lòng làm khảo sát trước.'); return; }
+  const r = window.lastResult;
+  const header = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14','q15','ex','cy','ef','ef_inv','burnout','level','alert'];
+  const row = r.values.concat([r.ex,r.cy,r.ef,r.ef_inv,r.burnout,r.levelLabel,r.alert ? 'YES' : 'NO']);
+  const csv = header.join(',') + '\n' + row.join(',');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'burnout_result.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
