@@ -94,16 +94,16 @@ function compute(){
   let advice = "";
   if(total < 15){
     level = "AN TOÀN";
-    advice = "Bạn không có dấu hiệu của hội chứng burnout. Tiếp tục duy trì lối sống cân bằng (học tập, nghỉ ngơi, giải trí). Đừng chủ quan, luôn quan sát các dấu hiệu căng thẳng nhỏ nhất!";
+    advice = "Bạn không có dấu hiệu của hội chứng burnout. Hãy duy trì lối sống cân bằng!";
   } else if(total <= 41){
     level = "MỨC NHẸ";
-    advice = "Có dấu hiệu burnout nhẹ. Thực hiện "Reset nhỏ" hàng ngày: Ngủ đủ, dành 30 phút mỗi ngày cho sở thích cá nhân. Bắt đầu quản lý thời gian hiệu quả hơn.";
+    advice = "Có dấu hiệu burnout nhẹ. Hãy ngủ đủ, thư giãn, quản lý thời gian hiệu quả hơn.";
   } else if(total <= 59){
     level = "MỨC TRUNG BÌNH";
-    advice = "Burnout trung bình. Cần hành động nghiêm túc: Xác định 1-2 nguồn áp lực lớn nhất (ví dụ: điểm số, sắp xếp thời gian) và thay đổi ngay lập tức (giảm tải áp lực, nghỉ ngơi hợp lí, nói chuyện với người thân/bạn bè/thầy cô).";
+    advice = "Burnout trung bình. Cần xác định nguồn áp lực và thay đổi ngay (nghỉ ngơi hợp lý, nói chuyện với người thân/bạn bè).";
   } else {
     level = "MỨC CAO";
-    advice = "Burnout cao – cảnh báo! Cần can thiệp chuyên nghiệp ngay! Hãy tìm kiếm sự hỗ trợ từ chuyên gia tâm lý học đường, tư vấn viên, hoặc bác sĩ. Ưu tiên sức khỏe tinh thần hơn mọi bài tập hay điểm số.";
+    advice = "Burnout cao – cảnh báo! Nên tìm đến chuyên viên tư vấn hoặc bác sĩ tâm lý học đường.";
   }
 
   const out = document.getElementById('output');
@@ -115,7 +115,7 @@ function compute(){
       <tr><td><strong>Mức độ</strong></td><td>${level}</td></tr>
     </table>
     <p class="note">${advice}</p>
-    <p class="note"><em></em></p>
+    <p class="note"><em>Màu đỏ trong bản gốc là tính điểm ngược (nhóm C – câu 10 đến 15).</em></p>
   `;
 
   window.lastResult = { values: vals, total, level };
@@ -138,5 +138,6 @@ function exportCSV(){
 </script>
 </body>
 </html>
+
 
 
