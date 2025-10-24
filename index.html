@@ -23,7 +23,7 @@
 </head>
 <body>
   <h1>Khảo sát mức độ Academic Burnout (Dành cho HS)</h1>
-  <p>Hãy trả lời theo cảm nhận của bạn trong <strong>4 tuần gần nhất</strong>. Chọn số từ 0 (Không bao giờ) đến 6 (Mỗi ngày).</p>
+  <p>Hãy trả lời theo cảm nhận của bạn trong <strong>4 tuần gần nhất</strong>.</p>
 
   <form id="surveyForm">
     <!-- Exhaustion Q1-Q6 -->
@@ -115,7 +115,6 @@ function compute(){
       <tr><td><strong>Mức độ</strong></td><td>${level}</td></tr>
     </table>
     <p class="note">${advice}</p>
-    <p class="note"><em>Màu đỏ trong bản gốc là tính điểm ngược (nhóm C – câu 10 đến 15).</em></p>
   `;
 
   window.lastResult = { values: vals, total, level };
@@ -138,6 +137,7 @@ function exportCSV(){
 </script>
 </body>
 </html>
+
 
 
 
