@@ -38,21 +38,21 @@
 <script>
 // Mảng câu hỏi (15)
 const questions = [
-  "1. Tôi cảm thấy kiệt sức vì việc học.",
-  "2. Tôi thấy mệt mỏi khi phải làm bài/ôn luyện.",
-  "3. Tôi thấy không còn năng lượng để học ngoài giờ.",
-  "4. Tôi thấy áp lực học tập làm tôi căng thẳng thường xuyên.",
-  "5. Tôi khó tập trung vì đầu óc mệt mỏi.",
-  "6. Tôi thấy cần nhiều thời gian nghỉ hơn để hồi phục.",
-  "7. Tôi thấy mình dần dần không còn quan tâm tới việc học.",
-  "8. Tôi cảm thấy học nhiều nhưng không còn ý nghĩa.",
-  "9. Tôi thường cảm thấy xa lánh bạn bè/giáo viên khi nói về việc học.",
-  "10. Tôi cảm thấy chán nản với mục tiêu học tập của mình.",
-  "11. Tôi cảm thấy mình hoàn thành bài tập đúng yêu cầu.",
-  "12. Tôi tự tin có thể học và làm tốt các bài kiểm tra.",
-  "13. Tôi thấy mình có kỹ năng quản lý thời gian để học.",
-  "14. Tôi thường tìm ra cách giải quyết khi gặp khó trong học.",
-  "15. Tôi cảm thấy học tập của mình có tiến bộ rõ rệt."
+  "1. Em cảm thấy kiệt sức và không còn chút năng lượng nào vì việc học.",
+  "2. Sau mỗi buổi học, em cảm thấy tinh thần và cảm xúc của mình trống rỗng, không còn gì.",
+  "3. Đến cuối ngày học, em cảm thấy mệt mỏi đến mức không muốn làm thêm bất cứ việc gì.",
+  "4. Em cảm thấy mệt mỏi khi thức dậy vào buổi sáng và phải đối mặt với một ngày khác ở trường.",
+  "5. Chỉ cần nghĩ đến việc phải học hay đến lớp thôi cũng khiến em thấy mệt mỏi và áp lực.",
+  "6. Em thấy mình không còn quan tâm đến việc học hành như trước đây nữa.",
+  "7. Em không còn cảm thấy hào hứng hay nhiệt tình với việc học nữa.",
+  "8. Em tự hỏi liệu việc học tập ở trường có thực sự có ích và ý nghĩa gì không.",
+  "9. Em cảm thấy chán ghét mọi thứ liên quan đến trường lớp, sách vở và bài tập.",
+  "10. Em cảm thấy tự tin rằng mình có thể hoàn thành tốt các nhiệm vụ học tập.",
+  "11. Em tin rằng mình là một học sinh có năng lực.",
+  "12. Em cảm thấy mình đã học được nhiều điều có giá trị trong năm học này.",
+  "13. Em cảm thấy những đóng góp của mình trong lớp học là có ích.",
+  "14. Em cảm thấy rất vui và có động lực khi đạt được mục tiêu học tập mà mình đề ra.",
+  "15. Khi gặp khó khăn trong học tập, em tin mình có thể tìm cách giải quyết được."
 ];
 
 const container = document.getElementById('questions');
@@ -67,71 +67,65 @@ questions.forEach((q,i)=>{
   for(let v=0; v<=6; v++){
     const opt = document.createElement('option');
     opt.value = v;
-    opt.innerText = v;
+    opt.innerText = `${v} - ${scaleLabel(v)}`;
     sel.appendChild(opt);
   }
   div.appendChild(sel);
   container.appendChild(div);
 });
 
+function scaleLabel(v){
+  const labels = ["Không bao giờ","Hiếm khi","Thỉnh thoảng","Đôi khi","Thường xuyên","Rất thường xuyên","Luôn luôn"];
+  return labels[v];
+}
+
 function compute(){
-  // read values
   const vals = [];
   for(let i=1;i<=15;i++) vals.push( Number(document.getElementById('q'+i).value) );
 
-  const ex = mean(vals.slice(0,6));
-  const cy = mean(vals.slice(6,10));
-  const ef = mean(vals.slice(10,15));
-  const ef_inv = 6 - ef;
-  const burnout = round2(ex + cy + ef_inv);
+  // đảo chiều nhóm C (10–15)
+  for(let i=9; i<15; i++){
+    vals[i] = 6 - vals[i];
+  }
 
-  // level
-  let levelLabel = '';
-  if (burnout <= 6) levelLabel = 'Thấp';
-  else if (burnout <= 12) levelLabel = 'Trung bình';
-  else levelLabel = 'Cao';
+  const total = vals.reduce((a,b)=>a+b,0);
 
-  // alert checks
-  const anyHigh = vals.some(v => v>=5);
-  const alert = (ex >= 4 || anyHigh) ? true : false;
+  let level = "";
+  let advice = "";
+  if(total < 15){
+    level = "AN TOÀN";
+    advice = "Bạn không có dấu hiệu của hội chứng burnout. Hãy duy trì lối sống cân bằng!";
+  } else if(total <= 41){
+    level = "MỨC NHẸ";
+    advice = "Có dấu hiệu burnout nhẹ. Hãy ngủ đủ, thư giãn, quản lý thời gian hiệu quả hơn.";
+  } else if(total <= 59){
+    level = "MỨC TRUNG BÌNH";
+    advice = "Burnout trung bình. Cần xác định nguồn áp lực và thay đổi ngay (nghỉ ngơi hợp lý, nói chuyện với người thân/bạn bè).";
+  } else {
+    level = "MỨC CAO";
+    advice = "Burnout cao – cảnh báo! Nên tìm đến chuyên viên tư vấn hoặc bác sĩ tâm lý học đường.";
+  }
 
-  // build UI
   const out = document.getElementById('output');
   out.style.display = 'block';
   out.innerHTML = `
-    <h3>Kết quả nhanh</h3>
+    <h3>Kết quả khảo sát</h3>
     <table>
-      <tr><th>Chỉ số</th><th>Giá trị</th></tr>
-      <tr><td>Exhaustion (Cạn kiệt)</td><td>${ex}</td></tr>
-      <tr><td>Cynicism (Hoài nghi)</td><td>${cy}</td></tr>
-      <tr><td>Efficacy (Hiệu quả) - (đã đảo chiều)</td><td>${ef_inv}</td></tr>
-      <tr><td><strong>Burnout Index (0–18)</strong></td><td><strong>${burnout}</strong></td></tr>
-      <tr><td>Mức độ</td><td><strong>${levelLabel}</strong></td></tr>
+      <tr><td><strong>Tổng điểm</strong></td><td>${total}</td></tr>
+      <tr><td><strong>Mức độ</strong></td><td>${level}</td></tr>
     </table>
-    <p class="note">${ alert ? '<span class="warn">Cảnh báo: có dấu hiệu cần hỗ trợ sớm. Vui lòng liên hệ cán bộ tư vấn nhà trường hoặc phụ huynh.</span>' : '<span class="ok">Không có cảnh báo khẩn cấp theo tiêu chí khảo sát này.</span>' }</p>
-    <div class="note">
-      <strong>Gợi ý hành động:</strong>
-      <ul>
-        <li>Nếu mức <strong>Cao</strong>: nên gặp tư vấn viên nhà trường; xem xét giảm tải tạm thời; tìm hỗ trợ chuyên môn nếu có dấu hiệu trầm cảm.</li>
-        <li>Nếu mức <strong>Trung bình</strong>: thử áp dụng Pomodoro, nhật ký biết ơn, tham gia nhóm đồng đẳng.</li>
-        <li>Nếu mức <strong>Thấp</strong>: duy trì thói quen học và cân bằng nghỉ ngơi.</li>
-      </ul>
-    </div>
-    <p class="note">Nguồn tham khảo: Dựa trên cấu trúc MBI-SS và lý thuyết tâm lý học học đường.</p>
+    <p class="note">${advice}</p>
+    <p class="note"><em>Màu đỏ trong bản gốc là tính điểm ngược (nhóm C – câu 10 đến 15).</em></p>
   `;
 
-  // store lastResult for CSV export
-  window.lastResult = { values: vals, ex, cy, ef, ef_inv, burnout, levelLabel, alert };
+  window.lastResult = { values: vals, total, level };
 }
 
-function mean(arr){ return round2(arr.reduce((a,b)=>a+b,0)/arr.length); }
-function round2(x){ return Math.round(x*100)/100; }
-
 function exportCSV(){
-  if(!window.lastResult){ alert('Chưa có kết quả để xuất. Vui lòng làm khảo sát trước.'); return; }
+  if(!window.lastResult){ alert('Chưa có kết quả để xuất.'); return; }
   const r = window.lastResult;
-  const header = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14','q15','ex','cy','ef','ef_inv','burnout','level','alert'];
-  const row = r.values.concat([r.ex,r.cy,r.ef,r.ef_inv,r.burnout,r.levelLabel,r.alert ? 'YES' : 'NO']);
+  const header = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14','q15','total','level'];
+  const row = r.values.concat([r.total, r.level]);
   const csv = header.join(',') + '\n' + row.join(',');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -144,3 +138,4 @@ function exportCSV(){
 </script>
 </body>
 </html>
+
